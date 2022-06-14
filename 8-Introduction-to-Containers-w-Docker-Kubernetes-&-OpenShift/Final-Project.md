@@ -27,6 +27,19 @@ For each of the nine tasks, provide a screenshot and upload the JPEG (.jpg) file
 * Task 8: Submit entries to the guestbook and have their tone analyzed. Some simple sentences will not have a tone detected. Ensure that you submit something complex enough so that its tone is detected.(2 points)
 
 * Task 9: Create a Horizontal Pod Autoscaler that shows guestbook as the scale target, the current and desired replicas as three, and the last scale time as the time the deployment was scaled up to three replicas (4 points)
+#
+## Final Project
+Objectives
+In this lab, you will:  
+
+Build and deploy a simple guestbook application  
+Use OpenShift image streams to roll out an update  
+Deploy a multi-tier version of the guestbook application 
+Create a Watson Natural Language Understanding service instance on IBM Cloud  
+Bind the Natural Language Understanding service instance to your application  
+Autoscale the guestbook app  
+
+
 
 ## Next Steps
 Be sure to take screenshots as per review criteria as you follow the step-by-step instructions.
