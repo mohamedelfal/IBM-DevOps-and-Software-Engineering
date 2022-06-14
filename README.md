@@ -9,7 +9,7 @@
 |5|Getting Started with Git and GitHub|
 |6|Python for Data Science, AI & Development|
 |7|Python Project for AI & Application Development|
-|8|[Introduction to Containers w/ Docker, Kubernetes & OpenShift](./6-Introduction-to-Containers-w-Docker-Kubernetes-&-OpenShift)|
+|8|[Introduction to Containers w/ Docker, Kubernetes & OpenShift](./8-Introduction-to-Containers-w-Docker-Kubernetes-&-OpenShift)|
 |9|Application Development using Microservices and Serverless|
 |10|Introduction to Test Driven Development (TDD)|
 |11|Continuous Integration and Continuous Delivery (CI/CD)|
