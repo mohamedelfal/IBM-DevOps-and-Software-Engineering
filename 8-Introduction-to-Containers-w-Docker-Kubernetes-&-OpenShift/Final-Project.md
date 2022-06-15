@@ -1,6 +1,7 @@
 # IBM
 # Introduction to Containers w/ Docker, Kubernetes & OpenShift
-# Final Project: Scenario and Review Criteria
+# Final Project: Guestbook App
+## Scenario and Review Criteria
 ## Project Overview
 In this final project, you will build and deploy a simple guestbook application.  
 You will roll out updates using Openshift image streams.   
