@@ -486,12 +486,140 @@ spec:
 13-Create the Redis slave Service.
 ```
 oc apply -f redis-slave-service.yaml
-``
+```
 ![image](https://user-images.githubusercontent.com/100445644/173719822-470a56f6-f9ea-4e35-8629-619396e9179b.png)
 
 If you click on the `redis-slave` Deployment in the Topology view, you should now see the `redis-slave` Service in the Resources tab.
 
 ![image](https://user-images.githubusercontent.com/100445644/173719920-c0da84c8-009e-4f7f-93eb-30f9e209fb4f.png)
+
+
+# Deploy v2 guestbook app
+Now it's time to deploy the second version of the guestbook app, which will leverage Redis for persistent storage.
+
+1-Click the +Add button to add a new application to this project.
+
+![image](https://user-images.githubusercontent.com/100445644/173720826-962365d8-061e-43ed-a3f0-7aebcbd785e9.png)
+
+To demonstrate the various options available in OpenShift, we'll deploy this guestbook app using an OpenShift build and the Dockerfile from the repo.
+
+2-Click the From Dockerfile option.
+![image](https://user-images.githubusercontent.com/100445644/173720884-7de219a6-9286-4cdd-acc8-3ab4ceb31afb.png)
+
+3-Paste the below URL in the Git Repo URL box.
+```
+https://github.com/ibm-developer-skills-network/guestbook
+```
+You should see a validated checkmark once you click out of the box.
+
+>Note: Ensure there are no spaces in the Git Repo URL that is to be copied.
+
+![image](https://user-images.githubusercontent.com/100445644/173721056-68484688-a3dc-47dc-94fb-d1511b7d67ec.png)
+
+3-Paste the below URL in the Git Repo URL box.
+```
+https://github.com/ibm-developer-skills-network/guestbook
+```
+You should see a validated checkmark once you click out of the box.
+>Note: Ensure there are no spaces in the Git Repo URL that is to be copied.
+
+![image](https://user-images.githubusercontent.com/100445644/173721715-3c4bc942-b798-4a7a-8f1d-97274e411500.png)
+
+4-Click Show Advanced Git Options.
+![image](https://user-images.githubusercontent.com/100445644/173721788-b4d1c895-5324-42b0-b8e8-7186e26895af.png)
+
+5-Since the Dockerfile isn't at the root of the repository, we need to tell OpenShift where it is.  
+Enter `/v2/guestbook` in the Context Dir box.  
+![image](https://user-images.githubusercontent.com/100445644/173721859-91f3d432-c3b1-41d9-aa4b-41745f2f9092.png)
+
+6-Under Container Port, enter 3000.
+![image](https://user-images.githubusercontent.com/100445644/173722047-d947b9c8-afb0-49e0-b599-8922bc09c972.png)
+
+7-Leave the rest of the default options and click Create.
+Since we gave OpenShift a Dockerfile, it will create a BuildConfig and a Build that will build an image using the Dockerfile, push it to the internal registry, and use that image for a Deployment.
+
+![image](https://user-images.githubusercontent.com/100445644/173722135-278b4d53-a127-481a-8dcf-147a5a595cfe.png)
+
+8-From the Topology view, click the `guestbook` Deployment.
+>📷Kindly take the screenshot of the guestbook deployment showing Build along with Service and Route for the final assignment.
+
+In the Resources tab, click the Route location to load the guestbook in the browser. Notice that the header says "Guestbook - v2" instead of "Guestbook - v1".
+
+>>Note: Please wait for the Builds to complete before clicking on the route link
+
+![image](https://user-images.githubusercontent.com/100445644/173722638-a05919d9-e817-4a75-95c3-4c2421cef217.png)
+
+9-From the guestbook in the browser, click the `/info` link beneath the input box.
+![image](https://user-images.githubusercontent.com/100445644/173723536-92305d4e-7ffd-4e3d-bbc9-b5e6bb336afb.png)
+>📷Kindly take the screenshot of the /info showing redis instead of in-memory datastore for the final assignment.
+
+![image](https://user-images.githubusercontent.com/100445644/173723587-87416885-0fdd-4a32-bb46-f1da203376a2.png)
+
+# Login to IBM CLOUD
+>Note: In the prework you have already created an Natural Language Understanding service instance. Kindly note the service name as it will be required.
+
+1-We need to store these credentials in a Kubernetes secret in order for our analyzer microservice to utilize them. From the terminal in the lab environment, login to your IBM Cloud account with your username. When prompted enter you password to login.
+```
+ibmcloud login -u <your_email_address> 
+```
+![image](https://user-images.githubusercontent.com/100445644/173724236-c1b8a79b-84d6-4517-9bda-81971bec1bd9.png)
+
+>If you are a federated user that uses a corporate or enterprise single sign-on ID, you can log in to IBM Cloud® from the console by using a federated ID and password. Use the provided URL in your CLI output to retrieve your one-time passcode. You know you have a federated ID when the login fails without the --sso and succeeds with the --sso option.
+
+2-Ensure that you target the resource group in which you created the Natural Language Understanding service. Remember that you noted this resource group in a previous step.
+```
+ibmcloud target -g <resource_group>
+``` 
+
+![image](https://user-images.githubusercontent.com/100445644/173725903-e59b7084-80e7-40c7-9ee7-d2ae672be8f8.png)
+
+3-Use the Explorer to edit `binding-hack.sh`. The path to this file is `guestbook/v2/binding-hack.sh`.  
+You need to insert the name of your IBM Cloud Natural Language Understanding service where it says `<your nlu service name>`.   
+You need to insert your OpenShift project where it says `<my_project>`.
+
+  ```sh
+  #!/bin/bash
+
+tone_analyzer="Natural Language Understanding-1s"
+
+B64_URL=$(ibmcloud resource service-keys --instance-name "$tone_analyzer" --output json| jq .[0].credentials.url -j | base64 -w 0)
+B64_APIKEY=$(ibmcloud resource service-keys --instance-name "$tone_analyzer" --output json| jq .[0].credentials.apikey -j | base64 -w 0)
+
+cat <<EOF | oc apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: binding-tone
+  namespace: sn-labs-mohamedelfal
+type: Opaque
+data:
+  url: $B64_URL
+  apikey: $B64_APIKEY
+EOF
+
+  ```
+![image](https://user-images.githubusercontent.com/100445644/173726643-bc0c2a70-1793-44a9-8563-86d2a0bf4529.png)
+
+If you don't remember your project name, run `oc project`. Make sure to save the file when you're done.
+
+![image](https://user-images.githubusercontent.com/100445644/173726802-5183c450-8753-4c77-b2a3-37b8ffa54589.png)
+
+4-Run the script to create a Secret containing credentials for your Natural Language Understanding service.
+```
+./binding-hack.sh
+```
+You should see the following output: `secret/tone-binding created`.
+
+![image](https://user-images.githubusercontent.com/100445644/173726960-75265be5-693e-48c1-8b81-0efed489ce6b.png)
+>Note: If you have tried this lab earlier, there might be a possibility that the previous session is still persistent. In such a case, you will see an 'Unchanged' message instead of the 'Configured' message in the above output. We recommend you to proceed with the next steps of the lab.
+
+5-Log back into the lab account.
+```
+ibmcloud login --apikey $IBMCLOUD_API_KEY
+```
+![image](https://user-images.githubusercontent.com/100445644/173727307-472eae47-9947-458d-b01a-91a921b912a1.png)
+
+
 
 
 
