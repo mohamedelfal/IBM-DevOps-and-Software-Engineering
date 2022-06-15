@@ -621,6 +621,136 @@ ibmcloud login --apikey $IBMCLOUD_API_KEY
 
 
 
+# Deploy the analyzer microservice
+Now that the Natural Language Understanding service is created and its credentials are provided in a Kubernetes Secret, we can deploy the analyzer microservice.
+
+1-Change to the analyzer directory.
+![image](https://user-images.githubusercontent.com/100445644/173727461-7fe73e10-aaf8-40cf-a7d6-e01b73c7a9e4.png)
+
+2-Build and push the analyzer image.
+```
+docker build . -t us.icr.io/$MY_NAMESPACE/analyzer:v1 && docker push us.icr.io/$MY_NAMESPACE/analyzer:v1
+```
+>Note: If the above step doesn’t run in the first time, please logout from the lab environment and clear your browser cache and cookies & relaunch the lab. Kindly do the lab from the beginning to get the correct output.
+
+![image](https://user-images.githubusercontent.com/100445644/173727586-9c0d7337-7717-4d7e-93ae-2ef25bd581bb.png)
+
+![image](https://user-images.githubusercontent.com/100445644/173732680-2c4865b9-5982-4f4b-b838-22542c3f13ae.png)
+
+3-Return to the v2 directory.
+```
+cd ..
+```
+
+4-Use the Explorer to edit `analyzer-deployment.yaml`. The path to this file is `guestbook/v2/analyzer-deployment.yaml`.  
+You need to insert your Container Registry namespace where it says `<my_namespace>`.
+![image](https://user-images.githubusercontent.com/100445644/173732788-0cd69bba-3ad0-4908-9013-623c4f3f63b7.png)
+If you don't remember your namespace, run echo `$MY_NAMESPACE`.   
+Make sure to save the file when you're done.   
+Also notice the env section, which indicates that environment variables will be set using the `binding-tone` Secret you created.
+![image](https://user-images.githubusercontent.com/100445644/173732946-7b82541a-0ca4-49a6-8145-9334c013a190.png)
+
+5-Create the analyzer Deployment.
+```
+oc apply -f analyzer-deployment.yaml
+```
+![image](https://user-images.githubusercontent.com/100445644/173733010-6ba137ff-a0ff-478c-8f53-9a10115797ca.png)
+>Note: If you have tried this lab earlier, there might be a possibility that the previous session is still persistent. In such a case, you will see an 'Unchanged' message instead of the 'Created' message in the above output. We recommend you to proceed with the next steps of the lab.
+
+>>📷Kindly take the screenshot of the topology showing "redis-master,redis slave and analyzer microservices" for the final assignment.
+
+![image](https://user-images.githubusercontent.com/100445644/173733070-c18fe1f2-1fb5-4dd1-b0a7-ee0618eb6daa.png)
+
+Return to the guestbook in the browser, refresh the page, and submit a new entry.
+
+8-You should see your entry appear along with a tone analysis.
+>📷Kindly take the screenshot of the entries to the guestbook and have their tone analyzed.
+![image](https://user-images.githubusercontent.com/100445644/173733150-63dbc6ab-8799-42b1-87e7-ca1eb4fce7cf.png)
+>Note: Some simple sentences will not have a tone detected. Ensure that you submit something complex enough so that its tone is detected.
+
+
+# Autoscale guestbook
+Now that guestbook is successfully up and running, let's set up a horizontal pod autoscaler (HPA) so that it can handle any load that comes its way. Make sure to keep the guestbook open in a browser tab so that it continues to make requests and consume resources so that it can be successfully autoscaled.
+
+First, we need to set resource requests and limits for the containers that will run. If a container requests a resource like CPU or memory, Kubernetes will only schedule it on a node that can give it that resource. On the other hand, limits prevent a container from consuming more than a certain amount of a resource.
+
+In this case, we're going to request 3 millicores of CPU and 40 MB of RAM. We'll limit the containers to 30 millicores and 100 MB. These numbers are contrived in order to ensure that the app scales.
+
+1-From the Topology view, click the guestbook Deployment. Then click Actions > Edit Deployment.
+
+![image](https://user-images.githubusercontent.com/100445644/173733241-1b7a0ee6-74bb-4d05-8480-532b1c2c6fa7.png)
+
+2-In the template.spec.containers section, find `resources: {}`.  
+Replace that with the following text. Make sure the spacing is correct as YAML uses strict indentation.
+```yaml
+resources:
+  limits:
+    cpu: 30m
+    memory: 100Mi
+  requests:
+    cpu: 3m
+    memory
+```
+![image](https://user-images.githubusercontent.com/100445644/173733416-0cd1de71-dc40-4bd4-8358-5a74c9ff599f.png)
+
+3-Click Save.
+![image](https://user-images.githubusercontent.com/100445644/173733460-a782c693-f733-428b-855f-254ce1445382.png)
+
+4-Switch to the Administrator perspective.
+![image](https://user-images.githubusercontent.com/100445644/173733517-049f6b3a-663f-4c3a-924c-08cc719865ea.png)
+
+5-Select Workloads > Horizontal Pod Autoscalers.
+![image](https://user-images.githubusercontent.com/100445644/173733546-f90b794e-7935-4570-89bf-71f6d11a6e29.png)
+
+6-Click Create Horizontal Pod Autoscaler.
+![image](https://user-images.githubusercontent.com/100445644/173733572-16f43d10-6e23-45f2-9708-b8c470b70c77.png)   
+
+7-Paste the following YAML into the editor.
+
+```yaml
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: guestbook-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: guestbook
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 1
+```
+![image](https://user-images.githubusercontent.com/100445644/173733668-877171d5-de49-4090-8f95-5e8048445ff3.png)
+
+This HPA indicates that we're going to scale based on CPU usage. Generally you want to scale when your CPU utilization is in the 50-90% range. For this example, we're going to use 1% so that the app is more likely to need scaling. The minReplicas and maxReplicas fields indicate that the Deployment should have between one and three replicas at any given time depending on load.
+
+8-Click Create.
+![image](https://user-images.githubusercontent.com/100445644/173733694-453dc5c3-6696-450e-b44b-bc0ce8f2ccb4.png)
+
+9-If you wait, you'll see both Current Replicas and Desired Replicas become three. This is because the HPA detected sufficient load to trigger a scale up to the maximum number of Pods, which is three. You can also view the Last Scale Time as well as the current and target CPU utilization. The target is obviously 1% since that's what we set it to. Note that it can take a few minutes to trigger the scale up.
+>📷Kindly take the screenshot of Horizontal Pod Autoscaler that shows guestbook as the scale target, the current and desired replicas as three, and the last scale time as the time the deployment was scaled up to three replicas.
+
+10-If you click the guestbook Deployment under Scale Target, you'll be directed to the Deployment where you can verify that there are now three Pods.
+![image](https://user-images.githubusercontent.com/100445644/173733751-062c6b4b-e484-4050-b128-0bd2a8a15024.png)
+
+Congratulations! You have completed the final project for this course. Do not log out of the lab environment (you can close the browser though) or delete any of the artifacts created during the lab, as these will be needed for grading.
+
+>Note: Please delete your project from Openshift Console & SN labs environment before signing out to ensure that further labs requiring the use of OpenShift console run correctly. To do the same, click on this link
+
+Changelog
+|Date	|Version	|Changed by	|Change Description|
+|:-----|:-----|:-----|:-----|
+|2022-04-12|	1.1	|K Sundararajan	|Updated Lab instructions|
+|2022-04-13|	1.2	|K Sundararajan	|Updated Lab instructions|
+|2022-04-14|	1.3	|K Sundararajan	|Updated Lab instructions|
+|2022-04-19|	1.4	|K Sundararajan	|Updated Lab instructions|
+#
+© IBM Corporation 2022. All rights reserved.
 
 
 
