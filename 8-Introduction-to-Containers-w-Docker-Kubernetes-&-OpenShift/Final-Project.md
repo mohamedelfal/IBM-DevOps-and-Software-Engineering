@@ -181,7 +181,7 @@ Let's update the guestbook and see how OpenShift's image streams can help us upd
 
 2-Let's edit the title to be more specific.   
 On line number 12, that says `<h1>Guestbook - v1</h1>`, change it to include your name.    
-Something like `<h1>Alex's Guestbook - v1</h1>`. Make sure to save the file when you're done.  
+Something like `<h1>Mohamed's Guestbook - v1</h1>`. Make sure to save the file when you're done.  
 ![image](https://user-images.githubusercontent.com/100445644/173711607-d36cd38b-8226-4890-9ab0-b725ae2a1ed5.png)
 
 ```html
@@ -228,6 +228,7 @@ Something like `<h1>Alex's Guestbook - v1</h1>`. Make sure to save the file when
 ```
 docker build . -t us.icr.io/$MY_NAMESPACE/guestbook:v1 && docker push us.icr.io/$MY_NAMESPACE/guestbook:v1
 ```
+  
 ![image](https://user-images.githubusercontent.com/100445644/173712919-dce0ac1c-790c-4cce-9e44-0010fb55331b.png)  
 
 4-Recall the --schedule option we specified when we imported our image into the OpenShift internal registry. As a result, OpenShift will regularly import new images pushed to the specified tag. Since we pushed our newly built image to the same tag, OpenShift will import the updated image within about 15 minutes. If you don't want to wait for OpenShift to automatically import the image, run the following command.
@@ -236,29 +237,261 @@ oc import-image guestbook:v1 --from=us.icr.io/$MY_NAMESPACE/guestbook:v1 --confi
 ```
 ![image](https://user-images.githubusercontent.com/100445644/173713022-dd5a1ccf-a965-446f-8979-ad597df50fb8.png)  
 
-5-Switch to the Administrator perspective so that you can view image streams.
+5-Switch to the Administrator perspective so that you can view image streams.  
 ![image](https://user-images.githubusercontent.com/100445644/173713061-ca214078-ccd3-478b-81e3-61d046311ef3.png)  
 
-6-Click Builds > Image Streams in the navigation.
+6-Click Builds > Image Streams in the navigation.  
 ![image](https://user-images.githubusercontent.com/100445644/173713166-371cbd1b-b0f8-4445-8b20-2084ac795c1f.png)  
 
-7-Click the guestbook image stream.
+7-Click the guestbook image stream.  
 ![image](https://user-images.githubusercontent.com/100445644/173713407-c122dc84-c350-484d-b7b6-181fb9047cf4.png)  
 
 8-Click the History menu. If you only see one entry listed here, it means OpenShift hasn't imported your new image yet. Wait a few minutes and refresh the page. Eventually you should see a second entry, indicating that a new version of this image stream tag has been imported. This can take some time as the default frequency for importing is 15 minutes.
->📷Kindly take the screenshot of the image stream showing two distinct version for the final assignment.
+>📷Kindly take the screenshot of the image stream showing two distinct version for the final assignment.  
 
 ![image](https://user-images.githubusercontent.com/100445644/173713545-107e91d5-d48a-44fa-94bc-4c1faa8ac007.png)  
 
-9-Return to the Developer perspective.
-![image](https://user-images.githubusercontent.com/100445644/173713959-b7c17f3f-e447-444e-b577-1a57bb8f5427.png)  
+9-Return to the Developer perspective.  
+![image](https://user-images.githubusercontent.com/100445644/173713959-b7c17f3f-e447-444e-b577-1a57bb8f5427.png)   
 
 >Note: Please wait for some time for the OpenShift console & the Developer perspective to load.
 
 10-View the guestbook in the browser again. If you still have the tab open, go there. If not, click the Route again from the guestbook Deployment. You should see your new title on this page! OpenShift imported the new version of our image, and since the Deployment points to the image stream, it began running this new version as well.
->📷Kindly take the screenshot of the updated guestbook for the final assignment.
+>📷Kindly take the screenshot of the updated guestbook for the final assignment.  
 
-![image](https://user-images.githubusercontent.com/100445644/173714350-242b51aa-e1a6-4d06-967c-37b950286d15.png)
+![image](https://user-images.githubusercontent.com/100445644/173714350-242b51aa-e1a6-4d06-967c-37b950286d15.png)  
+
+
+## Guestbook storage
+1-From the guestbook in the browser, click the `/info` link beneath the input box.   
+This is an information endpoint for the guestbook.
+![image](https://user-images.githubusercontent.com/100445644/173714759-76ea2f32-9a45-4944-9f36-4905d881245d.png)
+
+Notice that it says "In-memory datastore (not redis)". Currently, we have only deployed the guestbook web front end, so it is using in-memory datastore to keep track of the entries. This is not very resilient, however, because any update or even a restart of the Pod will cause the entries to be lost. But let's confirm this.
+
+>📷Kindly take the screenshot of the In-memory datastore for the final assignment.
+
+![image](https://user-images.githubusercontent.com/100445644/173714888-9b71b257-5dd9-4e5b-b3cc-62532796def9.png)
+
+2-Return to the guestbook application in the browser by clicking the Route location again.   
+You should see that your previous entries appear no more.   
+This is because the guestbook was restarted when your update was deployed in the last section.   
+We need a way to persist the guestbook entries even after restarts.  
+![image](https://user-images.githubusercontent.com/100445644/173715181-8f5e7f25-f1de-4236-a019-1bd7d4283ad9.png)
+>Note: Currently we are experiencing certain difficulties with the OpenShift console. There is a possibility that you will see your old entries because the image stream takes time in updating. You may move ahead with the further steps of lab.
+
+## Delete the guestbook
+In order to deploy a more complex version of the guestbook, delete this simple version.
+
+1-From the Topology view, click the `guestbook-app` application.   
+This is the light gray circle that surrounds the `guestbook` Deployment.  
+![image](https://user-images.githubusercontent.com/100445644/173715496-f1cb7556-0911-45ec-a4b8-5000dd2b5a1e.png)  
+2-Click Actions > Delete Application.
+![image](https://user-images.githubusercontent.com/100445644/173715545-7cdad1b5-c6fa-42ed-a9b5-50298b0b9060.png)
+
+
+2-Type in the application name and click Delete.  
+![image](https://user-images.githubusercontent.com/100445644/173715592-732de24d-4899-4267-8323-82e9e5b42934.png)
+ 
+
+
+## Deploy Redis master and slave
+We've demonstrated that we need persistent storage in order for the guestbook to be effective. Let's deploy Redis so that we get just that. Redis is an open source, in-memory data structure store, used as a database, cache and message broker.
+
+This application uses the v2 version of the guestbook web front end and adds on 1) a Redis master for storage, 2) a replicated set of Redis slaves, and 3) a Python Flask application that calls a Watson Natural Language Understanding service deployed in IBM Cloud to analyze the tone. For all of these components, there are Kubernetes Deployments, Pods, and Services. One of the main concerns with building a multi-tier application on Kubernetes is resolving dependencies between all of these separately deployed components.
+
+In a multi-tier application, there are two primary ways that service dependencies can be resolved. The v2/guestbook/main.go code provides examples of each. For Redis, the master endpoint is discovered through environment variables. These environment variables are set when the Redis services are started, so the service resources need to be created before the guestbook Pods start. For the analyzer service, an HTTP request is made to a hostname, which allows for resource discovery at the time when the request is made. Consequently, we'll follow a specific order when creating the application components. First, the Redis components will be created, then the guestbook application, and finally the analyzer microservice.
+
+>Note: If you have tried this lab earlier, there might be a possibility that the previous session is still persistent. In such a case, you will see an 'Unchanged' message instead of the 'Created' message when you run the Apply command for creating deployments. We recommend you to proceed with the next steps of the lab.  
+
+1-From the terminal in the lab environment, change to the v2 directory.
+```
+cd ../../v2
+```
+![image](https://user-images.githubusercontent.com/100445644/173716227-c4260fff-0b51-4e39-9964-f245503e56d7.png)
+
+2-Run the following command or open the `redis-master-deployment.yaml` in the Explorer to familiarize yourself with the Deployment configuration for the Redis master.  
+```
+cat redis-master-deployment.yaml
+```
+![image](https://user-images.githubusercontent.com/100445644/173716375-7c7cb683-3885-415c-997e-1bc9cc1332f8.png)
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-master
+  labels:
+    app: redis
+    role: master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      role: master
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: master
+    spec:
+      containers:
+      - name: redis-master
+        image: redis:5.0.5
+        ports:
+        - name: redis-server
+          containerPort: 6379
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+      volumes:
+      - name: redis-storage
+        emptyDir: {}
+```
+3-Create the Redis master Deployment.
+```
+oc apply -f redis-master-deployment.yaml
+```
+
+![image](https://user-images.githubusercontent.com/100445644/173716606-4fdbd828-fd65-4cb7-871e-4258a936d09e.png)
+
+4-Verify that the Deployment was created.
+```
+oc get deployments
+```
+![image](https://user-images.githubusercontent.com/100445644/173716793-25fc1099-850b-43d3-8a7b-4fa0ed5d79a4.png)
+
+5-List Pods to see the Pod created by the Deployment.  
+![image](https://user-images.githubusercontent.com/100445644/173716859-da1b9748-dfad-4ac2-86cf-7554d1ff5be2.png)  
+You can also return to the Topology view in the OpenShift web console and see that the Deployment has appeared there.
+
+6-Run the following command or open the `redis-master-service.yaml` in the Explorer to familiarize yourself with the Service configuration for the Redis master.
+```
+cat redis-master-service.yaml
+```  
+![image](https://user-images.githubusercontent.com/100445644/173717141-0ec6c36c-e971-43df-9193-fed42697087c.png)
+  
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+  labels:
+    app: redis
+    role: master
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis-server
+  selector:
+    app: redis
+    role: master
+```
+Services find the Pods to load balance based on Pod labels. The Pod that you created in previous step has the labels app=redis and role=master. The selector field of the Service determines which Pods will receive the traffic sent to the Service.  
+
+7-Create the Redis master Service.
+```
+oc apply -f redis-master-service.yaml
+```
+![image](https://user-images.githubusercontent.com/100445644/173717287-519d48ca-7aa7-480e-8d55-5efc2f8429f7.png)
+
+If you click on the `redis-master` Deployment in the Topology view, you should now see the `redis-master` Service in the Resources tab.
+![image](https://user-images.githubusercontent.com/100445644/173717372-1b2b1f7d-ab1c-4eeb-9f25-c53d8e21745d.png)
+
+8-Run the following command or open the `redis-slave-deployment.yaml` in the Explorer to familiarize yourself with the Deployment configuration for the Redis slave.
+```
+cat redis-slave-deployment.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-slave
+  labels:
+    app: redis
+    role: slave
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis
+      role: slave
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: slave
+    spec:
+      containers:
+      - name: redis-slave
+        image: redis:5.0.5
+        command: ["/bin/sh"]
+        args: ["-c","redis-server --slaveof redis-master 6379"]
+        ports:
+        - name: redis-server
+          containerPort: 6379
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+      volumes:
+      - name: redis-storage
+        emptyDir: {}
+```
+![image](https://user-images.githubusercontent.com/100445644/173719241-58942f26-0359-4153-9c30-26cc2be6c541.png)
+
+9-Create the Redis slave Deployment.
+```
+oc apply -f redis-slave-deployment.yaml
+```
+![image](https://user-images.githubusercontent.com/100445644/173719321-d19ec757-a570-4283-a5c2-b703c49945f2.png)
+
+10-Verify that the Deployment was created.
+```
+oc get deployments
+```
+![image](https://user-images.githubusercontent.com/100445644/173719442-bb68a379-fd05-4bb5-b133-0f726410767f.png)
+
+11-List Pods to see the Pod created by the Deployment.
+```
+oc get pods
+```
+![image](https://user-images.githubusercontent.com/100445644/173719527-1ffe8cfc-f4fc-47a6-9b93-984699575917.png)
+
+You can also return to the Topology view in the OpenShift web console and see that the Deployment has appeared there.
+
+12-Run the following command or open the redis-slave-service.yaml in the Explorer to familiarize yourself with the Service configuration for the Redis slave.
+```shell
+cat redis-slave-service.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave
+  labels:
+    app: redis
+    role: slave
+spec:
+  ports:
+  - port: 6379
+    targetPort: redis-server
+  selector:
+    app: redis
+    role: slave
+```
+![image](https://user-images.githubusercontent.com/100445644/173719736-9a80f8cc-43ec-49c6-8928-e1266b0454b3.png)
+
+13-Create the Redis slave Service.
+```
+oc apply -f redis-slave-service.yaml
+``
+![image](https://user-images.githubusercontent.com/100445644/173719822-470a56f6-f9ea-4e35-8629-619396e9179b.png)
+
+If you click on the `redis-slave` Deployment in the Topology view, you should now see the `redis-slave` Service in the Resources tab.
+
+![image](https://user-images.githubusercontent.com/100445644/173719920-c0da84c8-009e-4f7f-93eb-30f9e209fb4f.png)
 
 
 
