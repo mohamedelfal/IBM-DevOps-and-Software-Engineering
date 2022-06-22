@@ -100,3 +100,55 @@ If this worked, you should not get an error, but you should see the ID and the r
 You should also be able to go to your Cloudant instance dashboard, open the guestbook database that you created, and see a newly created document there containing your parameters and the date.  
 ![image](https://user-images.githubusercontent.com/100445644/175167478-1ccafe3f-8214-4e2a-9cf7-3fb3069bb663.png)
 
+## Step 3: Create actions to retrieve guestbook entries
+In this step, you need to create a sequence that again consists of two actions, but this sequence will be used to retrieve guestbook entries stored in the Cloudant database. This sequence will list all documents from the database, format the documents, and return them.
+
+1- Create a Node.js action called `set-read-input` in the `guestbook` package.
+
+2- The code for this action should be the following:
+```.js
+function main(params) {
+  return {
+    params: {
+      include_docs: true
+    }
+  };
+}
+```
+This code creates the parameters to be passed to the next function. In this case, when we list the documents in the database, we want to include the documents in the result that is returned so that we can view their contents.
+
+3- Add this action to a new sequence called `read-guestbook-entries-sequence`.  
+This sequence should also be in the `guestbook` package.
+
+4- Add a second action to this sequence by clicking the Add + button on the sequence page.  
+Use the public `list-documents` action from the Cloudant package.  
+Use your existing package binding since this action will also act upon your same database.   
+If the package binding doesn't show up under My bindings, refresh the page.   
+Make sure to save the sequence after you add this action.
+
+5- Create another Node.js action in this sequence.  
+Call this action `format-entries`.  
+
+
+
+6- The code for this action should be the following:
+```.js
+const md5 = require('spark-md5');
+
+function main(params) {
+  return {
+    entries: params.rows.map((row) => { return {
+      name: row.doc.name,
+      email: row.doc.email,
+      comment: row.doc.comment,
+      createdAt: row.doc.createdAt,
+      icon: (row.doc.email ? `https://secure.gravatar.com/avatar/${md5.hash(row.doc.email.trim().toLowerCase())}?s=64` : null)
+    }})
+  };
+}
+```
+
+This code formats the data returned by Cloudant so that it can be used by the front end web application for the guestbook UI.
+
+7- Test your work so far by going to the `read-guestbook-entries-sequence` and clicking Invoke.   
+You should see this return the formatted comments from your database.
