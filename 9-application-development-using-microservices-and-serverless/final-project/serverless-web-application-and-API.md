@@ -151,4 +151,22 @@ function main(params) {
 This code formats the data returned by Cloudant so that it can be used by the front end web application for the guestbook UI.
 
 7- Test your work so far by going to the `read-guestbook-entries-sequence` and clicking Invoke.   
-You should see this return the formatted comments from your database.
+You should see this return the formatted comments from your database.  
+
+## Step 4: Create an API
+In order for these functions to be utilized by the guestbook UI, we need to create an API. In this step, you will expose enable your sequences as web actions and create an API that responds to PUT and GET requests.
+
+1- For each sequence that you created, enable that sequence as a web action.
+
+2- Create an API called `guestbook`, with base path `/guestbook`.
+
+3- Create two operations for this API.   
+Both operations will use the path `/entries`.   
+One should be for GET requests and should invoke the `read-guestbook-entries-sequence sequence`.   
+The other should be for PUT requests and should invoke the `save-guestbook-entry-sequence` sequence. Use JSON for the response content type.
+
+4- Make note of the route for this API, as your web application will need it.  
+
+
+
+
