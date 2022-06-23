@@ -284,3 +284,12 @@ In this final project, you have leveraged the serverless and microservices knowl
 ![image](./image/30-Developer.jpg)
 ![image](./image/31-WEB.jpg)
 ![image](./image/32-testApp.jpg)
+
+## [Screenshots of tasks](./image/)
+![image](./image/task-1.jpg)
+![image](./image/task-2.jpg)
+![image](./image/task-3.jpg)
+![image](./image/task-4.jpg)
+![image](./image/task-5.jpg)
+![image](./image/task-6.jpg)
+![image](./image/task-7.jpg)
