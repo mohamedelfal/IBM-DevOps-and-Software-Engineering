@@ -167,6 +167,40 @@ The other should be for PUT requests and should invoke the `save-guestbook-entry
 
 4- Make note of the route for this API, as your web application will need it.  
 
+## Step 5: Deploy the web app using OpenShift
+You will deploy the web app in two different ways: as a microservice on OpenShift, and using Object Storage to host the static files. By using OpenShift, you can deploy your web app using as a microservice by using containers. Though this app is currently quite small and will only contain a single microservice, you could easily begin extending this application with additional microservices to enhance its features.
+
+1-Fork [this repository](https://github.com/ajp-io/serverless-guestbook) which contains code for the front end web application.
+
+2-View the `guestbook.js` file.   
+Notice that the `apiUrl` constant is blank.  
+In the quotes, put the route to your API, which you should have noted in the last step.  
+Commit this change to your repository.  
+If you're not familiar with GitHub, there is a pencil button the edit the file, and you after making your change you can leave the default commit message and click Commit changes.
+
+3-Click OpenShift Console at the top of this environment. This will launch the OpenShift console in a new tab.
+
+4-Change to the Developer perspective.
+
+5-Click the +Add button to add a new application.
+
+6-Choose From Git so that you can deploy your web app directly from your forked GitHub repository.
+
+7-Paste your GitHub repo URL in the box.
+
+8-Choose the Httpd builder image. This will build your web app as an Apache web server that serves static content. This is perfect since the web app consists of two simple files: an HTML file and a JavaScript file.
+
+9-Click Create.
+
+OpenShift will now create a build to build your repository into a container image to run on OpenShift.
+
+10-Click on the deployment that was just created. The outer circle is the application, so click the inner circle with the OpenShift logo.
+
+11-You should now see a pod, a build, a route. Once the build completes, the pod should stop crashing and should start running. At that point, click the route to view your web app.
+
+If you've done this correctly and you tested your actions in previous steps, you should see your test comment already present in the guestbook. This is because that comment was persisted to the Cloudant database, and this web app is reading all the comments from that database.
+
+12-Insert a new comment and ensure that it appears in your guestbook.
 
 
 
