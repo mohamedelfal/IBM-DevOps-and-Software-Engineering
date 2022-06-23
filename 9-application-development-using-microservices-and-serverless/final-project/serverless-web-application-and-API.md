@@ -202,5 +202,48 @@ If you've done this correctly and you tested your actions in previous steps, you
 
 12-Insert a new comment and ensure that it appears in your guestbook.
 
+## Step 6: Deploy the web app using Object Storage
+You can also host static sites using IBM Cloud Object Storage. By uploading your web app's files to a bucket in Object Storage, you can host a static website. This is particularly useful if you don't feel that you need microservices and your app can run as a simple static site.
+
+This method of deploying the web app will provide us with an entirely serverless solution: a cloud-managed Cloudant database to persist the guestbook entries, IBM Cloud Functions to save and retrieve entries from the database, and a static site hosted in Object Storage. This entire guestbook site will only require you to pay for what you use! (Of course, for this project it won't cost you anything since everything we are using is free!)
+
+Create an instance of IBM Cloud Object Storage. Make sure to select the Lite plan.
+
+Click Create a bucket.
+
+Click the arrow to Customize your bucket.
+
+Enter a bucket name that is unique is across all IBM accounts. Try <yourinitials>-guestbook.
+
+Select Regional resiliency and Smart Tier storage class.
+
+Scroll down to the Static website hosting and click Add rule.
+
+Keep the Routing rules (individual) selected and add the Index document index.html.
+
+Click Public access to On.
+
+Click Save.
+
+Scroll to the bottom and click Create bucket.
+
+Now you need to add your files to this bucket.
+
+From the main page of your repository in GitHub, download a zip file by clicking Code then Download ZIP.
+
+Unzip the file and navigate to the guestbook.js and index.html files.
+
+Open the bucket Objects view and drag and drop the guestbook.js and index.html files to the COS bucket.
+
+Navigate to the Configuration tab for the bucket and scroll down to the Static website hosting endpoints section to copy the Public endpoint into a browser tab.
+
+At this link, you should see another incarnation of your guestbook! Test it again to ensure that it works properly. Since the same database backs both the Object Storage and the OpenShift hosted sites, entries submitted in one will be reflected in the other.
+
+## Summary
+In this final project, you have leveraged the serverless and microservices knowledge that you acquired throughout this course.   
+   You interacted with IBM Cloud to provision two types of services: a Cloudant database and Cloud Object Storage.    
+   You created actions and sequences to store entries in and retrieve entries from the Cloudant Database. You exposed those sequences using web actions and an API.   
+   And finally, you hosted the front end for the guestbook web application as a microservice on OpenShift and as static files on Cloud Object Storage.
+
 
 
